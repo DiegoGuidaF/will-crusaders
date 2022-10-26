@@ -1,6 +1,6 @@
 # from typing import Union
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import FastAPI, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
 from fastapi_login import LoginManager
 from fastapi_login.exceptions import InvalidCredentialsException
@@ -17,10 +17,10 @@ DB = {
 }
 
 app = FastAPI()
-manager = LoginManager(LOGIN_SECRET, token_url='/auth/token', use_cookie=True)
+manager = LoginManager(LOGIN_SECRET, token_url='token', use_cookie=True)
 
 
-@app.post('/auth/token')
+@app.post('/token')
 def login(data: OAuth2PasswordRequestForm = Depends()):
     email = data.username
     password = data.password
@@ -39,8 +39,10 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
 
 
 @app.get("/")
-# def read_root(token: str = Depends(oauth2_scheme)):
-#    return {"token": token}
+def read_root(user: str = Depends(manager)):
+    return {"token": user}
+
+
 @manager.user_loader()
 def query_user(user_id: str):
     """
